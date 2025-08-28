@@ -1,50 +1,46 @@
+# --- DEPRECATED SCRIPT ---
+# This script appears to be a simplified, earlier version of the main bot (`main.py`).
+# It has limited functionality and is likely no longer in use.
+# It is recommended to remove this file from the project to avoid confusion.
+# The main bot logic is now handled in `main.py`.
+
 import os
 from dotenv import load_dotenv
 import discord
-from discord.ext import tasks, commands
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from discord.ext import commands
 import logging
-from datetime import datetime, timedelta
-import pytz  # for timezone
 
-# Charger les variables d'environnement depuis le fichier .env
+# Load environment variables from .env file
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID_AI"))
 
-# Configurer les logs
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# Créer l'intent et le bot
+# Create intents and the bot
 intents = discord.Intents.default()
-intents.messages = True  # Assure-toi que l'intent messages est activé
+intents.messages = True
 bot = commands.Bot(command_prefix="!", intents=intents)
-scheduler = AsyncIOScheduler(timezone='Europe/Brussels')  # Change as needed
-
-# Liste des horaires de check-in et check-out
-checkin_times = ["09:00", "13:30"]
-checkout_times = ["12:30", "17:00"]
-break_time = ["11:00", "15:00", "15:15"]
-lunch_time = ["12:30"]
 
 @bot.event
 async def on_ready():
-    # Lorsque le bot est prêt et connecté, envoie un message dans un canal spécifique
-    channel = bot.get_channel(CHANNEL_ID)  # Remplace CHANNEL_ID par l'ID du canal où tu veux envoyer le message
-    guild = channel.guild if channel else None
-    role = discord.utils.get(guild.roles, name="Hamilton 10") if guild else None
-    if role:
-        role_mention = role.mention
-    else:
-        logging.warning(f"Role not found in {channel.name}")
-        role_mention = ""
-
+    """
+    Called when the bot is ready and connected to Discord.
+    Sends a single message to a specific channel.
+    """
+    logging.info(f'Bot connected as {bot.user}')
+    channel = bot.get_channel(CHANNEL_ID)
     if channel:
-        await channel.send(f"🤖 {role_mention} Hello I'm CheckinBot Don't Forget to checkin, sorry for being today 🤖")  # Mentionner l'utilisateur avec son ID
+        guild = channel.guild
+        role = discord.utils.get(guild.roles, name="Hamilton 10") if guild else None
+        role_mention = role.mention if role else ""
+
+        await channel.send(f"🤖 {role_mention} Hello I'm CheckinBot Don't Forget to checkin, sorry for being today 🤖")
     else:
-        logging.error("Le canal spécifié n'a pas été trouvé.")
+        logging.error("The specified channel was not found.")
 
-    logging.info(f'Bot connecté en tant que {bot.user}')
-
-# Run the bot
-bot.run(TOKEN)
+# This block is not strictly necessary as the bot only sends one message and exits.
+# However, it keeps the bot running if you intend to add more functionality.
+if __name__ == "__main__":
+    bot.run(TOKEN)
