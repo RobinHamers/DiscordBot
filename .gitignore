@@ -8,3 +8,6 @@ __pycache__/
 *.log
 *.sqlite3
 discordbot.json
+
+.gemini/
+gha-creds-*.json
