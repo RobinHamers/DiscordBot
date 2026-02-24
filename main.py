@@ -362,3 +362,33 @@ def main():
 if __name__ == "__main__":
     main()
 # Triggering GitHub actions demonstration
+
+# --- NEW ADDITIONS FOR DEMONSTRATION ---
+class StatisticsHelper:
+    def __init__(self, start_time):
+        self.start_time = start_time
+        self.processed_messages = 0
+        
+    def get_uptime_seconds(self):
+        # A code reviewer action might notice this can return negative if start_time is in the future
+        # or suggest using datetime.now(timezone.utc) consistently
+        now = datetime.now()
+        diff = now - self.start_time
+        return diff.total_seconds()
+
+    def record_message(self, message_content):
+        # A simple code smell for the bot to complain about: hardcoded string
+        if "test" in message_content.lower():
+            logging.info("A test message was detected!")
+        self.processed_messages += 1
+
+bot_stats = StatisticsHelper(datetime.now())
+
+@bot.tree.command(name="botstats", description="Get some basic bot statistics")
+async def botstats(interaction: discord.Interaction):
+    uptime = bot_stats.get_uptime_seconds()
+    messages = bot_stats.processed_messages
+    
+    # Missing type hints, lacking f-string best practices, maybe an unhandled exception risk
+    response_text = "Bot has been running for " + str(uptime) + " seconds and processed " + str(messages) + " messages."
+    await interaction.response.send_message(response_text)
